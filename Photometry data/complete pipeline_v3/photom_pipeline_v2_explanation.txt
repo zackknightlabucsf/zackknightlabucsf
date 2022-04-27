@@ -1,0 +1,38 @@
+Quick rundown on how to use this pipeline
+By: James Grove
+
+1. First make photometry data useable!
+-Run writing_mat_files_fast_v3
+
+2. Generate a metadata file!
+-Run make_metadata_file
+-Input information into the generated excel file
+"exp" means the experiment name (must contain "licks" if lickometer was used)
+"Z" means the id of the mouse in the top chamber
+"K" means the id of the mouse in the bottom chamber
+"Notes" is for anything you might want to add
+"baseline_length" is the duration of time (in seconds) used for baseline
+"manip_time" is the timepoint (in seconds) when a manipulation (eg. Injection) was made
+"after_manip" is the duration of time (in seconds) the experiment lasts after manipulation was made
+"downsample_to" is the rate (in Hz) you want to downsample to (e.g. 4Hz)
+
+Optional parameters (can be left blank; used for lickometer analysis):
+"access_length" is the duration of time (in seconds) that access was given for
+"access_time" is the timepoint (in seconds) when access was given
+
+Additional note for lickometer analysis:
+"manip_time" should still be given (it is whenever baseline ended; usually same as "access_time")
+"after_manip" should still be given (it is how long the experiment continued past manip_time)
+
+NB. In case any of the times differ from mouse in Z vs. K, make separate lines for each
+
+NB. Baseline is assumed to end at manip_time
+
+NB. The following must be the same across mice in a given experiment:
+baseline_length, after_manip, downsample_to
+
+3. Compile the data!
+-Run compile_data
+
+4. Make some graphs!
+-Run licks_analysis OR ip_analysis

@@ -1,0 +1,35 @@
+%this script is used to make an excel file for metadata entry
+%WARNING!!!: will overwrite existing metadata file
+
+
+clear all;close all;
+
+data_dir='C:\Users\ZK\Desktop\PRLH Analysis\FD Empty Bottle';
+
+%%%%%%%%%%%%%%%%%%%
+
+home=cd;
+cd(data_dir)
+files=dir;
+dirFlags = [files.isdir];
+files=files(~dirFlags);
+d=struct2table(files);
+d=d(:,1);
+files=d.name;
+files=files(contains(files,".mat")); %getting rid of all but .mat files
+names=cell(size(files,1),size(files,2));
+exp=cell(size(files,1),size(files,2));
+Z=cell(size(files,1),size(files,2));
+K=cell(size(files,1),size(files,2));
+Notes=cell(size(files,1),size(files,2));
+baseline_length=cell(size(files,1),size(files,2));
+manip_time=cell(size(files,1),size(files,2));
+after_manip=cell(size(files,1),size(files,2));
+access_length=cell(size(files,1),size(files,2));
+access_time=cell(size(files,1),size(files,2));
+downsample_to=cell(size(files,1),size(files,2));
+
+
+d=table(files,exp,Z,K,Notes,baseline_length,manip_time,after_manip,access_length,access_time,downsample_to);
+cd(home)
+writetable(d,'metadata.xlsx')
