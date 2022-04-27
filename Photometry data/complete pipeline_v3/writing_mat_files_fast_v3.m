@@ -2,6 +2,8 @@
 %And saves the .mat files to save_dir
 %Written by: James Grove, on March 4, 2020
 
+%this comment was added for purposes of testing GitHub functionality
+
 clear all; close all;
 save_dir='C:\Users\ZK\Desktop\PRLH Analysis\FD Empty Bottle';%place to save mat files to
 
