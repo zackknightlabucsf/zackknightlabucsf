@@ -8,9 +8,9 @@ The pipeline contains scripts for converting Tucker Davis raw photometry data in
 
 There are two main outputs of this pipeline:
 
-1. licks_analysis_V3 aligns photometry data to TTL signals from a lickometer, finds lick bouts based on user defined parameters,and then generates an array of plots that show average responses across a cohort of mice. All of the analyses are plotted twice, once as F/F and once as z-score. The main ouputs are PSTHs aligned to:  (1) first lick of the first bout,  (2) the last lick of the first bout, (3) the first lick of all bouts, and (4) the last lick of all bouts. In addition, the script generates plots showing a trace of the average response across time; the average lick rate across time; and the average cumulative number of licks across time. 
+1. licks_analysis_V3 aligns photometry data to TTL signals from a lickometer, finds lick bouts based on user defined parameters,and then generates an array of plots that show average responses across a cohort of mice. All of the analyses are plotted twice, once as dF/F and once as z-score. The main ouputs are PSTHs aligned to:  (1) first lick of the first bout,  (2) the last lick of the first bout, (3) the first lick of all bouts, and (4) the last lick of all bouts. In addition, the script generates plots showing a trace of the average response across time; the average lick rate across time; and the average cumulative number of licks across time. 
 
-2.  IP_analysis_V3 is used for experiments that do not contain a lickometer (IP injections, solid food presentation, etc…). It generates mean traces for an experiment aligned to the manipulation time, expressed as both F/F and z-score. It also generates a bar plot of the mean values during a time window that can be specified in the code. 
+2.  IP_analysis_V3 is used for experiments that do not contain a lickometer (IP injections, solid food presentation, etc…). It generates mean traces for an experiment aligned to the manipulation time, expressed as both dF/F and z-score. It also generates a bar plot of the mean values during a time window that can be specified in the code. 
 
 Detailed Protocol
 
