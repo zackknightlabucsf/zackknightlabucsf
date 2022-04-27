@@ -1,3 +1,2 @@
 - 👋 Welcome to the github of Dr. Zachary Knight's lab at UCSF
-- 👀 We study the neurobiology of homeostasis
-- 💁 This space is used to upload scripts our lab uses for analysis
+- 👀 This space is used to upload scripts our lab uses for analysis
