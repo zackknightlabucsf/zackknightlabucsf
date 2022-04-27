@@ -1,0 +1,5 @@
+﻿mouse,file,"crossreg ('A', 'B', or 'NA')",experiment,file frame rate,behavior video file (tif file or 'NA'),behavior video frame rate,lickometer file (csv file or 'NA'),lickometer channel,psth timemark (X:XX),time before (X:XX),rec_end after time stamp (X:XX),access_time (total time access is given after first lick)
+DVDS1,JG_092619_DVDS1-pp-BP-MC_lowPNR_wspace_small,NA,water licks,4,NA,10,JG_092619_DVDS1.csv,GPIO-1,10:00,9:00,30:00,5:00
+DVDS2,JG_092619_DVDS2-pp-BP-MC_lowPNR_wspace_small,NA,water licks,4,NA,10,JG_092619_DVDS2.csv,GPIO-1,10:00,9:00,30:00,5:00
+DV1,JG_050419_DV1-BP-MC_lowPNR_wspace_small,NA,water licks,4,NA,10,JG_050419_DV1.csv,GPIO-1,10:00,9:00,30:00,5:00
+DV3,JG_050419_DV3-BP-MC_lowPNR_wspace_small,NA,water licks,4,NA,10,JG_050419_DV3.csv,GPIO-1,10:00,9:00,30:00,5:00
