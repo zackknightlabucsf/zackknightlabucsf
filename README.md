@@ -1,5 +1,6 @@
 - 👋 Welcome to the github of Dr. Zachary Knight's lab at UCSF
 - 👀 This space is used to upload scripts our lab uses for analysis
+- 📬 For questions, email James at James.Grove@ucsf.edu
 
 
 Within each directory, each file is listed along with when it was last changed and a brief description of the change.
