@@ -1,0 +1,4 @@
+mouse,file (wspace_small),"crossreg ('A', 'B', or 'NA')",experiment,file frame rate,behavior video file (tif file or 'NA'),behavior video frame rate,lickometer file (csv file or 'NA'),lickometer channel,when access was given (X:XX),time before (X:XX),time after (X:XX)
+vta5,en_ghr_A5_ppmococrop_lowPNR_wspace_small,NA,licks,4,NA,10,a5.csv,GPIO-1,10:00,9:00,20:00
+vta6,en_ghr_A8_ppmococrop_lowPNR_wspace_small,NA,licks,4,NA,10,a8.csv,GPIO-1,10:00,9:00,20:00
+vta6,en_ghr_A9_ppmococrop_lowPNR_wspace_small,NA,licks,4,NA,10,a9.csv,GPIO-1,10:00,9:00,20:00
