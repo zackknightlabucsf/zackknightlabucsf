@@ -1,0 +1,266 @@
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+import pandas as pd
+import numpy as np
+from tslearn.clustering import TimeSeriesKMeans, KShape, KernelKMeans
+from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+import matplotlib as mpl
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import DivergingNorm
+import matplotlib.colors as mcolors
+import peakutils
+from scipy.ndimage.filters import uniform_filter1d
+
+
+a=pd.read_csv('VGLUTDTRM1_heasteps_EU_RAW.csv', header=None)
+a
+df=a.T
+df.index=df.index/60/5
+df.columns = np.arange(len(df.columns))+1
+
+
+wcss = []
+
+for i in range(1, 11):
+    model = KMeans(n_clusters = i,     
+                    init = 'k-means++',                 # Initialization method for kmeans
+                    max_iter = 300,                     # Maximum number of iterations 
+                    n_init = 10,                        # Choose how often algorithm will run with different centroid 
+                    random_state = 0)                   # Choose random state for reproducibility
+    model.fit(a)                              
+    wcss.append(model.inertia_)
+    
+# Show Elbow plot
+plt.plot(range(1, 11), wcss)
+plt.title('Elbow Method')                               # Set plot title
+plt.xlabel('Number of clusters')                        # Set x axis name
+plt.ylabel('Within Cluster Sum of Squares (WCSS)')      # Set y axis name
+plt.show()
+
+#variables for the preprocessing for kmeans
+preprocessing_meanvar = False # True to use TimeSeriesScalerMeanVariance preprocessing
+smooth_n = 10 # n observations to smooth over
+smooth_func = 'mean' # one of ['mean','min','max','sum']
+norm = True # normalize the data to 0-1 range
+model = 'kmeans'
+n_clusters = 4 # number of clusters to fit
+
+
+if smooth_n > 0:
+    if smooth_func == 'mean':
+        df = df.rolling(smooth_n).mean().dropna(how='all')
+    elif smooth_func == 'max':
+        df = df.rolling(smooth_n).max().dropna(how='all')
+    elif smooth_func == 'min':
+        df = df.rolling(smooth_n).min().dropna(how='all')
+    elif smooth_func == 'sum':
+        df = df.rolling(smooth_n).sum().dropna(how='all')
+    else:
+        df = df.rolling(smooth_n).mean().dropna(how='all')
+
+# normalize the data if specified
+if norm:
+    df = (df-df.min())/(df.max()-df.min())
+    
+    
+# look at our data
+print(df.shape)
+df.head()
+
+
+# get values to cluster on
+X = df.transpose().values
+if preprocessing_meanvar:
+    X = TimeSeriesScalerMeanVariance().fit_transform(X)
+    df = pd.DataFrame(X.reshape(df.shape), columns=df.columns, index=df.index)
+if model == 'kshape':
+    model = KShape(n_clusters=n_clusters, max_iter=10, n_init=2).fit(X)
+elif model == 'kmeans':
+    model = TimeSeriesKMeans(n_clusters=n_clusters, metric="euclidean", max_iter=10, n_init=2).fit(X)
+elif model == 'dtw':
+    model = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=5, n_init=2).fit(X)
+elif model == 'kernelkmeans':
+    model = KernelKMeans(n_clusters=n_clusters, kernel="gak", max_iter=5, n_init=2).fit(X)
+else:
+    model = TimeSeriesKMeans(n_clusters=n_clusters, metric="euclidean", max_iter=10, n_init=2).fit(X)
+    
+    
+# build helper df to map metrics to their cluster labels
+df_cluster = pd.DataFrame(list(zip(df.columns, model.labels_)), columns=['metric', 'cluster'])
+
+# make some helper dictionaries and lists
+cluster_metrics_dict = df_cluster.groupby(['cluster'])['metric'].apply(lambda x: [x for x in x]).to_dict()
+cluster_len_dict = df_cluster['cluster'].value_counts().to_dict()
+clusters_dropped = [cluster for cluster in cluster_len_dict if cluster_len_dict[cluster]==1]
+clusters_final = [cluster for cluster in cluster_len_dict if cluster_len_dict[cluster]>1]
+clusters_final.sort()
+
+#extract cluster column 
+extracted_col = df_cluster["cluster"]
+s=extracted_col.to_frame()
+
+#join cluster column to df
+gdf = a.join(s)
+
+#make new dataframes based on cluster
+k0=gdf.loc[gdf['cluster'] == 0]
+k1=gdf.loc[gdf['cluster'] == 1]
+k2=gdf.loc[gdf['cluster'] == 2]
+k3=gdf.loc[gdf['cluster'] == 3]
+
+#Clean up dataFrames 
+m=[k0, k1, k2,k3]
+def klean(m):
+    y=(m).drop(['cluster'], axis=1)
+    y=y.T
+    y=y.reset_index()
+    y.index=y.index/60/5
+    y = y.drop(y.columns[[0]], axis=1)  # df.columns is zero-based pd.Index
+    return y
+k0, k1, k2, k3=[klean(m) for m in m]
+
+#Read dehydrated file 
+b=pd.read_csv('VGLUTM1_heasteps_Deh_RAW.csv', header=None)
+b
+bf=b.T
+bf.index=bf.index/60/5
+bf.columns = np.arange(len(bf.columns))+1
+
+#extract cluster column 
+extracted_col = df_cluster["cluster"]
+p=extracted_col.to_frame()
+
+#join cluster column to df
+gbf = b.join(s)
+
+#make new dataframes based on cluster
+L0=gbf.loc[gdf['cluster'] == 0]
+L1=gbf.loc[gdf['cluster'] == 1]
+L2=gbf.loc[gdf['cluster'] == 2]
+L3=gbf.loc[gdf['cluster'] == 3]
+
+#Clean up dataFrames 
+m=[L0, L1, L2, L3]
+def klean(m):
+    y=(m).drop(['cluster'], axis=1)
+    y=y.T
+    y=y.reset_index()
+    y.index=y.index/60/5
+    y = y.drop(y.columns[[0]], axis=1)  # df.columns is zero-based pd.Index
+    return y
+L0, L1, L2,L3=[klean(m) for m in m]
+
+#Mean clusters
+t=[k0, k1, k2, k3, L0, L1, L2, L3]
+def mean(t):
+        return (t).mean(axis=1)
+    
+k0m, k1m, k2m,k3m, L0m, L1m, L2m, L3m = [mean(t) for t in t]
+
+##filtering Mean trace, transposing and converting to DataFrame
+N =10 #change this for more or less filtering
+b=[k0m, k1m, k2m, k3m, L0m, L1m, L2m, L3m] #variables
+
+def FilTran(b):
+    y=uniform_filter1d([b], size=N)
+    y=y.T
+    y=pd.DataFrame(y, columns = ['Avg'])
+    y.index=y.index/60/5
+    y.index_col="time"
+    return y
+        
+k0mf, k1mf, k2mf, k3mf, L0mf, L1mf, L2mf, L3mf=[FilTran(b) for b in b]
+
+##Baseline Correction
+z=[k0mf, k1mf, k2mf, k3mf, L0mf, L1mf, L2mf, L3mf]
+
+def baseline(z):
+    base=peakutils.baseline(z)
+    y=(z)-base
+    return y
+
+base_k0mf, base_k1mf, base_k2mf, base_k3mf, base_L0mf, base_L1mf, base_L2mf, base_L3mf=[baseline(z) for z in z]
+
+fig, ax=plt.subplots(sharey=True)
+
+ax.plot(base_k0mf, 'blue')
+ax.plot(base_L0mf,'black')
+#ax.set_xlim(10, 15)
+plt.rcParams["figure.figsize"]=20,10
+
+#read temperature readout
+TE=pd.read_csv('Temperature Readout/03-May-2022_VGLUTM1_23_40__steps_euhydrated.csv', index_col='read_time')
+TE.index=TE.index/60
+
+TWD=pd.read_csv('Temperature Readout/10-May-2022_VGLUTM1_23_40__steps_dehydrated.csv', index_col='read_time')
+TWD.index=TWD.index/60
+
+
+#fig, ax=plt.subplots(sharey=True)
+#ax.plot(TE, 'blue')
+#ax.set_xlim(11, 15)
+
+#truncate dataframe to match first heating bout
+def truncate(u):
+    e=np.array(u)
+    y=[i for i in range(len(e)) if e[i] > 23.3]
+    y=pd.DataFrame(y)
+    y=y.iloc[0]
+    y=pd.DataFrame(y)
+    return y.values
+
+te, twd = [truncate(u) for u in u]
+
+if te > twd:
+    v=te-twd
+    v=v.item() 
+    TE1=TE.drop(TE.index[0:v])
+    TE1=TE1.reset_index().drop(["read_time"], axis=1)
+    TE1.index=TE1.index/60/5
+    print('TE1 new')
+    
+elif te < twd:
+    v=twd-te
+    v=v.item() 
+    TWD1=TWD.drop(TWD.index[0:v])
+    TWD1=TWD1.reset_index().drop(["read_time"], axis=1)
+    TWD1.index=TWD1.index/60/5
+    print('TWD1 new')
+
+
+fig, ax=plt.subplots()
+ax.plot(TE1)
+ax.plot(TWD)
+#ax.plot(TWD, 'black')
+
+def align(r):
+        w=r.drop((r).index[0:v])
+        w=w.reset_index().drop(["index"], axis=1)
+        w.index=w.index/60/5
+        return w
+
+r=[base_k0mf, base_k1mf, base_k2mf, base_k3mf]
+m=[base_L0mf, base_L1mf, base_L2mf, base_L3mf]
+
+if 'TE1' in locals():
+    ##align the first heat step
+    ab_k0mf, ab_k1mf, ab_k2mf, ab_k3mf=[align(r) for r in r]
+    print('euhydrated use ab_')
+else:
+    print('euhydrated use base_')
+    pass 
+     
+if 'TWD1' in locals():
+    ab_L0mf, ab_L1mf, ab_L2mf, ab_L3mf=[align(m) for m in m]
+    ('dehydrated use ab_')
+else:
+    print('dehydrated use base_')
+    pass
+
+fig, ax=plt.subplots(sharey=True)
+ax.plot(ab_k3mf, 'blue')
+ax.plot(base_L3mf, 'black')
