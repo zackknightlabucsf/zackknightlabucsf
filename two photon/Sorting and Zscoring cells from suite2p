@@ -1,0 +1,22 @@
+## Sorting cells from suite2p 
+
+F=np.load('F.npy', allow_pickle=True)
+Fneu=np.load('Fneu.npy', allow_pickle=True)
+iscell=np.load('iscell.npy', allow_pickle=True)
+
+## convert to dataframe
+iscell=pd.DataFrame(iscell)
+F=pd.DataFrame(F)
+Fneu=pd.DataFrame(Fneu)
+
+## creating variables with only cells
+F_cells=F.loc[(iscell[0] == 1)]
+Fneu_cells=Fneu.loc[(iscell[0] == 1)]
+
+##correcting fluorescence
+F_corr=F_cells-0.7*Fneu_cells
+F_corr=F_corr.T
+F_corr.index=F_corr.index/60/5
+
+##zscored
+p=(F_corr-(F_corr.loc[1:15].mean(axis=0)))/(F_corr.loc[1:15].std())
